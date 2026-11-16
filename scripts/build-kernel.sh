@@ -1,54 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Find the project directory, regardless of where the script is launched.
 PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$PROJECT_DIR"
-
 KERNEL_VERSION="6.12.117"
-DOCKER_IMAGE="embedded-linux-builder"
 JOBS="${JOBS:-4}"
 
-if [[ ! -f configs/kernel.config ]]; then
-    echo "Missing configs/kernel.config. Save your kernel configuration first." >&2
+SOURCE_DIR="$PROJECT_DIR/linux-$KERNEL_VERSION"
+CONFIG_FILE="$PROJECT_DIR/configs/kernel.config"
+
+if [[ ! -d "$SOURCE_DIR" ]]; then
+    echo "Kernel source directory not found: $SOURCE_DIR" >&2
     exit 1
 fi
 
-# Build or update the Docker environment.
-docker build -t "$DOCKER_IMAGE" .
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "Saved configuration not found: $CONFIG_FILE" >&2
+    exit 1
+fi
 
-# Download, configure and compile inside Docker.
-docker run --rm \
-    --user "$(id -u):$(id -g)" \
-    --mount "type=bind,source=$PROJECT_DIR,target=/workspace" \
-    --env KERNEL_VERSION="$KERNEL_VERSION" \
-    --env JOBS="$JOBS" \
-    "$DOCKER_IMAGE" bash -euo pipefail -c '
-        cd /workspace
+cd "$SOURCE_DIR"
 
-        SOURCE_DIR="linux-${KERNEL_VERSION}"
-        ARCHIVE="${SOURCE_DIR}.tar.xz"
-        SOURCE_URL="https://cdn.kernel.org/pub/linux/kernel/v6.x/${ARCHIVE}"
+# Restore the saved configuration.
+cp "$CONFIG_FILE" .config
 
-        if [[ ! -d "$SOURCE_DIR" ]]; then
-            curl --fail --location --retry 3 \
-                "$SOURCE_URL" -o "${ARCHIVE}.part"
-            mv "${ARCHIVE}.part" "$ARCHIVE"
-            tar -xf "$ARCHIVE"
-        fi
+# Update the configuration and compile the kernel.
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j"$JOBS" Image
 
-        cd "$SOURCE_DIR"
+# Check the output.
+test -s arch/arm64/boot/Image
+file arch/arm64/boot/Image
 
-        cp /workspace/configs/kernel.config .config
-
-        make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
-        make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-            -j"$JOBS" Image
-
-        test -s arch/arm64/boot/Image
-        ls -lh arch/arm64/boot/Image
-        file arch/arm64/boot/Image
-    '
-
-echo "Kernel build completed:"
-echo "$PROJECT_DIR/linux-$KERNEL_VERSION/arch/arm64/boot/Image"
+echo "Kernel build completed: $SOURCE_DIR/arch/arm64/boot/Image"
