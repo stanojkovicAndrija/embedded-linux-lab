@@ -4,6 +4,7 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         build-essential \
         gcc-aarch64-linux-gnu \
+        libc6-dev-arm64-cross \
         binutils-aarch64-linux-gnu \
         bc \
         bison \

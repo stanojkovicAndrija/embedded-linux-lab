@@ -1,3 +1,8 @@
-
+/linux-6.12.117/
+/linux-*.tar.xz
+/busybox-1.37.0/
+/busybox-*.tar.bz2
+/rootfs-staging/
+/rootfs.cpio.gz
 /linux-6.12.117/
 /linux-*.tar.xz
