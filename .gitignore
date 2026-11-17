@@ -6,3 +6,5 @@
 /rootfs.cpio.gz
 /linux-6.12.117/
 /linux-*.tar.xz
+/qemu-11.1.3/
+/qemu-*.tar.xz
