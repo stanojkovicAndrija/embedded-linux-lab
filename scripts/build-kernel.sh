@@ -6,15 +6,38 @@ KERNEL_VERSION="6.12.117"
 SOURCE_DIR="$PROJECT_DIR/linux-$KERNEL_VERSION"
 CONFIG_FILE="$PROJECT_DIR/configs/kernel.config"
 JOBS=4
+CLEAN=false
 
-if [[ $# -gt 0 ]]; then
-    if [[ $# -ne 1 || ! "$1" =~ ^-j([1-9][0-9]*)$ ]]; then
-        echo "Usage: $0 [-j<number>]" >&2
-        exit 1
-    fi
+usage() {
+    echo "Usage: $0 [--clean] [-j<number>]"
+}
 
-    JOBS="${BASH_REMATCH[1]}"
-fi
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --clean)
+            CLEAN=true
+            ;;
+        -j*)
+            if [[ "$1" =~ ^-j([1-9][0-9]*)$ ]]; then
+                JOBS="${BASH_REMATCH[1]}"
+            else
+                usage >&2
+                exit 1
+            fi
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown argument: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
+
 if [[ ! -d "$SOURCE_DIR" ]]; then
     echo "Kernel source directory not found: $SOURCE_DIR" >&2
     exit 1
@@ -27,14 +50,16 @@ fi
 
 cd "$SOURCE_DIR"
 
-# Restore the saved configuration.
+if [[ "$CLEAN" == true ]]; then
+    echo "Cleaning kernel build..."
+    make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- clean
+fi
+
 cp "$CONFIG_FILE" .config
 
-# Update the configuration and compile the kernel.
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j"$JOBS" Image
 
-# Check the output.
 test -s arch/arm64/boot/Image
 file arch/arm64/boot/Image
 
