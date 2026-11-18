@@ -1,0 +1,8 @@
+config HELLO
+	tristate "Hello World driver"
+	help
+	  A simple Hello World driver that prints messages
+	  when initialized and removed.
+
+	  Choose Y to build it into the kernel,
+	  M to build it as a module, or N to disable it.
