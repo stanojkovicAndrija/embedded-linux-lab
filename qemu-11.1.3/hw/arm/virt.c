@@ -27,8 +27,9 @@
  *    information in a device binding that we aren't providing.
  * This is essentially the same approach kvmtool uses.
  */
-
 #include "qemu/osdep.h"
+#include "hw/i2c/arm_sbcon_i2c.h"
+#include "hw/i2c/i2c.h"
 #include "qemu/datadir.h"
 #include "qemu/units.h"
 #include "qemu/option.h"
@@ -2876,7 +2877,18 @@ static void virt_post_cpus_gic_realized(VirtMachineState *vms,
         }
     }
 }
+static void create_i2c_with_tmp105(void)
+{
+    DeviceState *controller;
+    I2CBus *bus;
 
+    controller = sysbus_create_simple(TYPE_ARM_SBCON_I2C,
+                                      0x090d0000, NULL);
+
+    bus = (I2CBus *)qdev_get_child_bus(controller, "i2c");
+
+    i2c_slave_create_simple(bus, "tmp105", 0x48);
+}
 static void machvirt_init(MachineState *machine)
 {
     VirtMachineState *vms = VIRT_MACHINE(machine);
@@ -3207,7 +3219,7 @@ static void machvirt_init(MachineState *machine)
     vms->highmem_ecam &= (!firmware_loaded || aarch64);
 
     create_rtc(vms);
-
+    create_i2c_with_tmp105();           
     create_pcie(vms);
     create_cxl_host_reg_region(vms);
 

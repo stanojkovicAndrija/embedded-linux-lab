@@ -11,4 +11,6 @@ exec ./qemu-11.1.3/build/qemu-system-aarch64 \
   -nographic \
   -kernel linux-6.12.117/arch/arm64/boot/Image \
   -initrd rootfs.cpio.gz \
+  -monitor tcp:127.0.0.1:4444,server=on,wait=off \
+  -dtb devicetree/virt-tmp105.dtb \
   -append "console=ttyAMA0 rdinit=/init"
