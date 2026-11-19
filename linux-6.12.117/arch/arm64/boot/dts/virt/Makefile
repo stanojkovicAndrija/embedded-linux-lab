@@ -1,0 +1,1 @@
+dtb-y += virt-tmp105.dtb

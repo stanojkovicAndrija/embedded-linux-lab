@@ -58,7 +58,7 @@ fi
 cp "$CONFIG_FILE" .config
 
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j"$JOBS" Image
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j"$JOBS" Image dtbs
 
 test -s arch/arm64/boot/Image
 file arch/arm64/boot/Image
