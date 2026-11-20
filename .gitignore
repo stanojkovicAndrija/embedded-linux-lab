@@ -1,0 +1,2 @@
+*.dtb
+/qemu-build.log
