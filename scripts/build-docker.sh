@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-DOCKER_IMAGE="embedded-linux-builder:1.0"
+DOCKER_IMAGE="embedded-linux-builder:1.1"
 
 cd "$PROJECT_DIR"
 
