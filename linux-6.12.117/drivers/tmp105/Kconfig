@@ -1,0 +1,8 @@
+config TMP105
+	tristate "Temperature 105  driver"
+	help
+	  A simple Temperature driver that prints messages
+	  when initialized and removed.
+
+	  Choose Y to build it into the kernel,
+	  M to build it as a module, or N to disable it.

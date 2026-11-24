@@ -22,6 +22,11 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 		status = "okay";
+
+		temperature-sensor@48 {
+			compatible = "ti,tmp105";
+			reg = <0x48>;
+		};
 	};
 
 	memory@40000000 {
