@@ -9,6 +9,7 @@ exec ./qemu-11.1.3/build/qemu-system-aarch64 \
   -cpu cortex-a57 \
   -m 1024 \
   -nographic \
+  -nic none \
   -kernel linux-6.12.117/arch/arm64/boot/Image \
   -initrd rootfs.cpio.gz \
   -monitor tcp:127.0.0.1:4444,server=on,wait=off \
