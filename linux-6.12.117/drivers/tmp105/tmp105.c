@@ -17,13 +17,32 @@ static const struct of_device_id tmp105_idtable[] = {
       { }
 };
 MODULE_DEVICE_TABLE(of, tmp105_idtable);
+/*
+ * Check that the adapter supports reading and writing the one-byte
+ * configuration register and reading the two-byte temperature register. 
+ * It returns error value if either of those 2 is not true.
+ */
+static int tmp105_probe(struct i2c_client *client)
+{
+	if (!i2c_check_functionality(client->adapter,
+				     I2C_FUNC_SMBUS_BYTE_DATA |
+					     I2C_FUNC_SMBUS_READ_WORD_DATA))
+		return -EIO;
 
-static int tmp105_probe(struct i2c_client *client){
-    pr_info("probed/n");
-    return 0;
+    struct tmp105_data *data; 
+    data = kzalloc(sizeof(*data), GFP_KERNEL);//allocates the memory 
+    if(data==NULL){
+        return -ENOMEM;
+    }
+    data->client=client;
+    i2c_set_clientdata(client, data);//binding the client with data so we can use remove and free the memory later
+	pr_info("probed\n");
+	return 0;
 }
 static void tmp105_remove(struct i2c_client *client){
-    pr_info("removed/n");
+    struct tmp105_data *data = i2c_get_clientdata(client);
+    kfree(data);//frees the memory allocated with kzalloc
+    pr_info("removed\n");
 }
 
 static struct i2c_driver tmp105_driver = {
